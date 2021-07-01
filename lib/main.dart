@@ -1,18 +1,73 @@
+import 'dart:convert';
+import 'package:usersapi/API.dart';
+import 'package:usersapi/detail.dart';
+import 'package:usersapi/models/User.dart';
 import 'package:flutter/material.dart';
-import 'package:passing_data/src/models/todo_model.dart';
-import 'package:passing_data/src/pages/screen_todos.dart';
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
+  build(context) {
     return MaterialApp(
-      title: 'Atividade Semana 11',
-      theme: ThemeData(primarySwatch: Colors.yellow),
-      home: TodosScreen(),
+      debugShowCheckedModeBanner: false,
+      title: 'Users API',
+      theme: ThemeData(
+        primarySwatch: Colors.yellow,
+      ),
+      home: MyListScreen(),
+    );
+  }
+}
+
+class MyListScreen extends StatefulWidget {
+  @override
+  createState() => _MyListScreenState();
+}
+
+class _MyListScreenState extends State {
+  var users = new List<User>();
+
+  _getUsers() {
+    API.getUsers().then((response) {
+      setState(() {
+        Iterable list = json.decode(response.body);
+        users = list.map((model) => User.fromJson(model)).toList();
+      });
+    });
+  }
+
+  initState() {
+    super.initState();
+    _getUsers();
+  }
+
+  dispose() {
+    super.dispose();
+  }
+
+  @override
+  build(context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Todos"),
+      ),
+      body: ListView.builder(
+        itemCount: users.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(users[index].name),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DetailScreen(user: users[index]),
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
